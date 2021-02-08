@@ -13,4 +13,10 @@ ggplot(data=penguins,
        mapping = aes(x = bill_depth_mm,
                      y = bill_length_mm,
                      color = species)) +
-  geom_point()
+  geom_point() +
+  labs(titles = "Bill depth and length",
+       subtitle = "Dimensions for Adelie, Chinstrap, and Gentoo Penguins",
+       x = "Bill depth (mm)", y = "Bill lenght (mm)",
+       color = "Species",
+       caption = "Source: Palmer Station LTER / palmerpenguins packages")
+
