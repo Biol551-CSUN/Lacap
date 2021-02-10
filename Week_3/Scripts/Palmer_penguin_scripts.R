@@ -12,11 +12,18 @@ glimpse(penguins)
 ggplot(data=penguins,
        mapping = aes(x = bill_depth_mm,
                      y = bill_length_mm,
-                     color = species)) +
+                     color = species,
+                     shape = species,
+                     size = body_mass_g,
+                     alpha = flipper_length_mm)) +
   geom_point() +
   labs(titles = "Bill depth and length",
        subtitle = "Dimensions for Adelie, Chinstrap, and Gentoo Penguins",
        x = "Bill depth (mm)", y = "Bill lenght (mm)",
        color = "Species",
-       caption = "Source: Palmer Station LTER / palmerpenguins packages")
+       shape = "Species",
+       size = "Body mass (g)",
+       alpha = "Flipper length (mm)",
+       caption = "Source: Palmer Station LTER / palmerpenguins packages") +
+  scale_color_viridis_d() #color blind scale
 
