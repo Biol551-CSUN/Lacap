@@ -48,5 +48,5 @@ ChemData_long %>% # selecting data
         axis.title.y = element_text(color = "#67B9E9FF", face = 2)) + #change axis text color
   scale_fill_manual(values = ghibli_palette(1)[c(3, 5, 7)]) + #Ghibli palette fill
   ggsave(here("Week_4", "Output", "2021_02_17_Week_4b_HW_Plot.png")) #save plot
-  
+   
 
