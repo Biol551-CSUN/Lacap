@@ -2,7 +2,7 @@
 ### Created by: Group 2, Roland, Claudia, Jamie, and Jasmin ###
 ### Created on: 2021-02-17 ###
 
-### Libraries ###
+### Libraries ### 
 library(tidyverse)
 library(here)
 library(ghibli)
