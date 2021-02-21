@@ -25,7 +25,7 @@ ChemData_clean<-ChemData %>% #renaming ChemData to ChemData_clean
   summarise(Param_means = mean(Values, na.rm=TRUE), #get mean
             Param_vars = var(Values, na.rm=TRUE), #get variance
             Param_sd = sd(Values, na.rm=TRUE)) %>% #get standard deviation
-            write_csv(here("week_4", "Output", "HOMEWORK_20210217")) #export as a csv to the right folder
+            write_csv(here("week_4", "Output", "2021-02-17_Week_4b_HW_Output")) #export as a csv to the right folder
 
 
 View(ChemData_clean) #view data
