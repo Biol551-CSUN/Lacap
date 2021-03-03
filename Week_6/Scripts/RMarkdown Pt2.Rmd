@@ -1,0 +1,61 @@
+---
+title: "RMarkdown Pt2"
+author: "Roland Lacap"
+date: "3/3/2021"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    theme: journal
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+# Introduction
+Today, we will use **Palmer Penguins** to maniupulate figures in RMarkdown.
+
+```{r}
+#Load Libraries
+library(palmerpenguins)
+library(tidyverse)
+library(here)
+library(kableExtra)
+```
+
+# Make a plot
+
+```{r PengFig, echo=FALSE, fig.align="center", fig.asp=1.2, fig.cap="This is a figure of penguin flippers.", fig.path="../Output/"}
+PenguinFigure <- penguins %>% 
+  ggplot(aes(x=species,
+             y=flipper_length_mm,
+             color=island))+
+  geom_boxplot()
+
+PenguinFigure
+```
+
+# Make a Table (very basic way)
+
+| Table 1 | col2 |
+|:-|:-:|
+|1|2|
+
+|Time|Session|Topic|
+|:-|:-:|-:|
+|_left_|_center_|_right_|
+|01:00||1||Anatomy|
+
+```{r PengTable, echo=FALSE}
+penguins %>% 
+  group_by(species) %>% 
+  summarise(billmean=mean(bill_length_mm, na.rm=TRUE)) %>% 
+  kbl() %>% #make it a kable table
+  kable_paper() %>% 
+  row_spec(2, bold = TRUE, color = "white", background = "red")
+```
+
