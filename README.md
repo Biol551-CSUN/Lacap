@@ -15,4 +15,7 @@
 * [Data](https://github.com/Biol551-CSUN/Lacap/tree/main/Week_5/Data)
 * [Output](https://github.com/Biol551-CSUN/Lacap/tree/main/Week_5/Output)
 * [Scripts](https://github.com/Biol551-CSUN/Lacap/tree/main/Week_5/Script)
+### [Week 6](https://github.com/Biol551-CSUN/Lacap/tree/main/Week_6)
+* [Output](https://github.com/Biol551-CSUN/Lacap/tree/main/Week_6/Output)
+* [Scripts](https://github.com/Biol551-CSUN/Lacap/tree/main/Week_6/Scripts)
 
