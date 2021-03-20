@@ -25,6 +25,8 @@ office_Badplot <- office_ratings %>%
 
 office_Badplot 
 
+office_logo <- readJPEG(here("Week_8","Scripts","The_office_logo.jpg"))
+
 office_Good <- office_ratings %>% 
   unite(col = "Season_Episode",
         c(1:2),
@@ -49,7 +51,7 @@ office_Goodplot <- office_Good %>%
        subtitle = "Top 10 Episodes",
        x = "Total Votes from Audience",
        y = "Season:Episode",
-       caption = "Source: SteamCharts | @LacapRoland")+
+       caption = "Source: IMDB | @LacapRoland")+
   theme_bw()+
   guides(fill = guide_legend(title="IMDB Rating"))+
   scale_fill_manual(values = c("#D6E3F3","#DDB78C","#54A8D6"))+
