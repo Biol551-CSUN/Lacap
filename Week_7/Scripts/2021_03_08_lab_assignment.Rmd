@@ -13,7 +13,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.path = "../Output/")
 ```
 
-#Introduction  
+# Introduction  
 Today, we chose to label a world map showing the locations of the meteorite landings.
 
 

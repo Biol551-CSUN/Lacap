@@ -9,52 +9,62 @@ library(tidytuesdayR)
 library(ggstream)
 library(PNWColors)
 library(tvthemes)
-require(jpeg)
 
 ### Get data
-office_ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-17/office_ratings.csv')
+office_ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-17/office_ratings.csv') %>% 
+  write_csv(here("week_8", "Data", "office_ratings"))
 
-office_Badplot <- office_ratings %>% 
-  ggplot(aes(x=imdb_rating,
-             y=total_votes,
-             fill = title)) +
-  geom_jitter(alpha = 0.5,
-              fill = title) +
-  guides(fill = FALSE)
-  ggsave(here("Week_8","Output","Bad_plot.png")) 
+### Bad plot
+office_bad <- office_ratings %>% 
+  ggplot(aes(x = total_votes,
+             y = title,
+             fill = season,
+             color = episode)) +
+  geom_col()+
+  theme_brooklyn99()+
+  theme(axis.title.y = element_blank(),
+        axis.title.x = element_text(color="white"),
+        axis.text.x = element_text(color="white"),
+        axis.text.y = element_text(color="white",
+                                   angle = 45),
+        plot.title=element_text(hjust=1, #centered figure title in bold
+                                face="bold"),
+        plot.subtitle = element_text (hjust = 1))+
+  labs(title = "The",
+       subtitle = "Office",
+       x = "TOTAL")
 
-office_Badplot 
+office_bad
 
-office_logo <- readJPEG(here("Week_8","Scripts","The_office_logo.jpg"))
-
-office_Good <- office_ratings %>% 
+### Good plot
+office_good <- office_ratings %>% 
   unite(col = "Season_Episode",
         c(1:2),
         sep = ":") %>% 
   unite(col = "Title",
         c("Season_Episode", "title"),
         sep = " ") %>% 
-  group_by(Title) %>% 
-  summarise(max_rating = max(imdb_rating),
-            max_votes = max(total_votes)) %>% 
-  arrange(desc(max_rating)) %>% 
-  slice_max(max_rating, n = 10)
+  top_n(10,imdb_rating) %>% 
+  filter(Title != "9:22 A.A.R.M.")
+  
 
-theoffice_img <- readJPEG(here("Scripts","The_office_logo.jpg"))
-
-office_Goodplot <- office_Good %>% 
-  ggplot(aes(x=max_votes,
+office_Goodplot <- office_good %>% 
+  ggplot(aes(x=total_votes,
              y=Title,
-             fill = as.factor(max_rating))) +
+             fill = as.factor(imdb_rating))) +
   geom_bar(stat="identity") +
   labs(title = "The Office", #add titles and change axis labels
-       subtitle = "Top 10 Episodes",
+       subtitle = "Top 10 Episodes based on the IMDB Rating",
        x = "Total Votes from Audience",
        y = "Season:Episode",
        caption = "Source: IMDB | @LacapRoland")+
   theme_bw()+
+  theme(plot.title=element_text(hjust=0.5, #centered figure title in bold
+                                face="bold",
+                                size = 20),
+        plot.subtitle = element_text (hjust = 0.5))+
   guides(fill = guide_legend(title="IMDB Rating"))+
-  scale_fill_manual(values = c("#D6E3F3","#DDB78C","#54A8D6"))+
-ggsave(here("Week_8","Output","Good_plot.png")) 
+  scale_fill_manual(values = c("#D6E3F3","#DDB78C","#54A8D6"))
 
 office_Goodplot
+
