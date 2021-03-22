@@ -38,7 +38,13 @@ office_ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatasci
 ```
 
 # Now lets show a bad plot
-The story for the creation of this plot is inspired by the very first days of coding. As a newbie to RStudio, making a new code and making it meaningful is daunting. Especially since learning RStudio is similar to learning a new language. 
+The story for the creation of this plot is inspired by the very first days of coding. As a newbie to RStudio, making a new code and making it meaningful is daunting. Especially since learning RStudio is similar to learning a new language.   
+Reasons why it's a *bad plot* are:  
+  - The Y-axis is unreadable.  
+  - The X-axis is discrete and doesn't share a lot of information.  
+  - The title is just on the right side of the plot for no reason.  
+  - Although I like the color blue, this is just a bad color scheme.  
+  - The data isn't wrangled well enough for it be a meaningful plot.   
 ```{r 2021_03_22_office_bad, fig.width = 8, fig.height = 5, fig.cap = "Figure 1. Ratings of all episodes from The Office.", fig.align= "center"}
 office_bad <- office_ratings %>% #create bad plot
   ggplot(aes(x = total_votes,
@@ -63,7 +69,13 @@ office_bad
 ```
 
 # Now lets turn it around!
-I am now going to switch this plot around and have it make sense. After 8 weeks of a computer modeling course taught by an amazing professor, I'll apply what I know and wrangle the data and make it meaningful!
+I am now going to switch this plot around and have it make sense. After 8 weeks of a computer modeling course taught by an amazing professor, I'll apply what I know and wrangle the data and make it meaningful!  
+Reasons its a *good plot* are:    
+  - The data is cleaned up and wrangled to be meaningful.   
+  - The data is narrowed down to show the Top 10 best episodes from the   Office.  
+  - The plot is pleasing to the eye and doesn't distract the reader.  
+  - The X and Y axes are useful and understandable.   
+  - The title and names tells the story of the plot.   
 ```{r 2021_03_20_office_good, fig.width = 8, fig.height = 5, fig.cap = "Figure 2. Adapted version from the bad plot. Top 10 episodes of The Office.", fig.align= "center"}
 office_good <- office_ratings %>% #begin the clean-up process
   unite(col = "Season_Episode", #combined the season and episode columns
