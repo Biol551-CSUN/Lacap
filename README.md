@@ -22,7 +22,7 @@
 * [Data](https://github.com/Biol551-CSUN/Lacap/tree/main/Week_7/Data)
 * [Output](https://github.com/Biol551-CSUN/Lacap/tree/main/Week_7/Output)
 * [Scripts](https://github.com/Biol551-CSUN/Lacap/tree/main/Week_7/Scripts)
-### [Spring_Break](https://github.com/Biol551-CSUN/Lacap/tree/main/Spring_Break)
+### [Spring Break](https://github.com/Biol551-CSUN/Lacap/tree/main/Spring_Break)
 * [Data](https://github.com/Biol551-CSUN/Lacap/tree/main/Spring_Break/Data)
 * [Output](https://github.com/Biol551-CSUN/Lacap/tree/main/Spring_Break/Output)
 * [Scripts](https://github.com/Biol551-CSUN/Lacap/tree/main/Spring_Break/Scripts)
