@@ -1,0 +1,111 @@
+---
+title: "Bad plot vs good plot"
+author: "Roland Lacap"
+date: "2021-03-20"
+output:
+  rmdformats::readthedown:
+  html_document: 
+   toc: TRUE
+   toc_float: TRUE
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      fig.path = "../Output/")
+```
+
+# Introduction  
+For this assignment, I will be using data from TidyTuesday. I will demonstrate how to plot this data in a *bad* plot and then in a *good* plot. My goal is to show the Top 10 episodes from **The Office** based on their rating on IMDB. 
+<center>![ ](https://media.giphy.com/media/3o6ZsVGSlpm2PvxkUo/giphy.gif)</center>
+
+# Load libraries
+```{r}
+library(tidyverse)
+library(here)
+library(tidytuesdayR)
+library(ggstream)
+library(PNWColors)
+library(tvthemes)
+```
+
+# Get The Office data
+```{r}
+office_ratings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-17/office_ratings.csv') %>% 
+  write_csv(here("week_8", "Data", "office_ratings")) #save the data 
+```
+
+# Now lets show a bad plot
+The story for the creation of this plot is inspired by the very first days of coding. As a newbie to RStudio, making a new code and making it meaningful is daunting. Especially since learning RStudio is similar to learning a new language.   
+Reasons why it's a *bad plot* are:  
+  - The Y-axis is unreadable.  
+  - The X-axis is discrete and doesn't share a lot of information.  
+  - The title is just on the right side of the plot for no reason.  
+  - Although I like the color blue, this is just a bad color scheme.  
+  - The data isn't wrangled well enough for it be a meaningful plot.   
+```{r 2021_03_22_office_bad, fig.width = 8, fig.height = 5, fig.cap = "Figure 1. Ratings of all episodes from The Office.", fig.align= "center"}
+office_bad <- office_ratings %>% #create bad plot
+  ggplot(aes(x = total_votes,
+             y = title,
+             fill = season,
+             color = episode)) +
+  geom_col()+
+  theme_brooklyn99()+ #theme from TVthemes
+  theme(axis.title.y = element_blank(), #remove y axis title 
+        axis.title.x = element_text(color="white"), #make all text white
+        axis.text.x = element_text(color="white"),
+        axis.text.y = element_text(color="white",
+                                   angle = 45), #change the angle of the y axis
+        plot.title=element_text(hjust=1, #right-justify title to make it worse
+                                face="bold"), #bold it
+        plot.subtitle = element_text (hjust = 1))+
+  labs(title = "The", #oh goodness, I'll just make this really bad.
+       subtitle = "Office",
+       x = "TOTAL") #give mystery by just saying total
+
+office_bad
+```
+
+# Now lets turn it around!
+I am now going to switch this plot around and have it make sense. After 8 weeks of a computer modeling course taught by an amazing professor, I'll apply what I know and wrangle the data and make it meaningful!  
+Reasons its a *good plot* are:    
+  - The data is cleaned up and wrangled to be meaningful.   
+  - The data is narrowed down to show the Top 10 best episodes from the   Office.  
+  - The plot is pleasing to the eye and doesn't distract the reader.  
+  - The X and Y axes are useful and understandable.   
+  - The title and names tells the story of the plot.   
+```{r 2021_03_20_office_good, fig.width = 8, fig.height = 5, fig.cap = "Figure 2. Adapted version from the bad plot. Top 10 episodes of The Office.", fig.align= "center"}
+office_good <- office_ratings %>% #begin the clean-up process
+  unite(col = "Season_Episode", #combined the season and episode columns
+        c(1:2),
+        sep = ":") %>% 
+  unite(col = "Title", #combined the columns to say season, episode, and title.
+        c("Season_Episode", "title"),
+        sep = " ") %>% 
+  top_n(10,imdb_rating) %>% #show only the top 10 episodes
+  filter(Title != "9:22 A.A.R.M.") #removed because it was rated the same
+  
+
+office_Goodplot <- office_good %>% #create plot
+  ggplot(aes(x=total_votes,
+             y=Title,
+             fill = as.factor(imdb_rating))) + #had to put it as a factor for color
+  geom_bar(stat="identity") +
+  labs(title = "The Office", #add titles and change axis labels
+       subtitle = "Top 10 Episodes based on the IMDB Rating",
+       x = "Total Votes from Audience",
+       y = "Season:Episode",
+       caption = "Source: IMDB | @LacapRoland")+
+  theme_bw()+
+  theme(plot.title=element_text(hjust=0.5, #centered figure title in bold
+                                face="bold",
+                                size = 20),
+        plot.subtitle = element_text (hjust = 0.5))+
+  guides(fill = guide_legend(title="IMDB Rating"))+
+  scale_fill_manual(values = c("#D6E3F3","#DDB78C","#54A8D6")) #changed the color
+
+office_Goodplot
+```
+
