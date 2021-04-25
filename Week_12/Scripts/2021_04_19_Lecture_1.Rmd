@@ -1,0 +1,240 @@
+---
+title: "week 12 lecture 1"
+author: "Roland Lacap"
+date: "4/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message=FALSE, warning = FALSE}
+### Load Libraries
+library(here)
+library(tidyverse)
+library(tidytext)
+library(wordcloud2)
+library(janeaustenr)
+
+```
+
+# Manipulation
+I can input sequences and manipulate them here. For example, I can cleanup sequence data or create primers this way!
+
+Add the T7 sequences using this! this will be super helpful. 
+
+Paste + seq data
+
+```{r}
+seq_data<-c("ATCCCGTC")
+str_sub(seq_data, start = 2, end = 4) # extract the 2nd to 4th AA
+#good for getting primer sequences from FASTA sequences
+
+str_sub(seq_data, start = 3, end = 3) <- "A" # add an A in the 3rd position
+seq_data
+
+str_dup(seq_data, times = c(2, 3))
+# duplicates the sequence twice. If I want to make to dup specific
+```
+
+# White Space
+This will remove any spaces in our data. This is a problem when we try to make it the same variables. 
+```{r}
+badtreatments<-c("High", " High", "High ", "Low", "Low")
+badtreatments
+
+str_trim(badtreatments) # this removes both
+
+str_trim(badtreatments, side = "left") # this removes left
+```
+
+This will add a space to those. 
+```{r}
+str_pad(badtreatments, 5, side = "right") # add a white space to the right side after the 5th character
+
+str_pad(badtreatments, 5, side = "right", pad = "1") # add a 1 to the right side after the 5th character
+```
+
+# Locale sensitive
+Changes the case of the words.
+```{r}
+x<-"I love R!"
+str_to_upper(x)
+
+str_to_lower(x)
+
+str_to_title(x)
+```
+
+# Pattern matching
+
+This will be most useful finding the specific sequences. 
+
+```{r}
+data<-c("AAA", "TATA", "CTAG", "GCTT")
+
+# find all the strings with an A
+str_view(data, pattern = "A")
+```
+
+```{r}
+str_detect(data, pattern = "A")
+str_detect(data, pattern = "AT")
+str_locate(data, pattern = "AT") #will locate which will have it.
+```
+
+# regex: regular expressions
+There are several types of regular expressions:
+  - Metacharacters
+  - Sequences
+  - Quantifiers
+  - Character classes
+  - POSIX character classes (Portable Operating System Interface)
+
+### Metacharacters
+lets clean up data with metacharacters. Metacharacters are operators in R, but we can remove them and create a string of characters. 
+```{r}
+vals<-c("a.b", "b.c","c.d")
+
+#string, pattern, replace
+str_replace(vals, "\\.", " ") # this will only look for the FIRST but none of the future instances. 
+
+vals<-c("a.b.c", "b.c.d","c.d.e")
+#string, pattern, replace
+str_replace_all(vals, "\\.", " ") # this will remove all instances
+```
+
+### sequences
+this will be able to determine which string characters will have a specific indicator. this uses an anchor to find your specific sequences.
+```{r}
+val2<-c("test 123", "test 456", "test")
+str_subset(val2, "\\d")
+```
+### Quantifiers
+| symbol| Meaning|
+|---|----|  
+|^	|Beginning of String|  
+|$	|End of String|
+|\n	|Newline|
+|+	|One or More of Previous|
+|*	|Zero or More of Previous|
+|?	|Zero or One of Previous|
+|{5}|	Exactly 5 of Previous|
+|{2, 5}|	Between 2 and 5 or Previous|
+|{2, }	|More than 2 of Previous|
+
+
+### Character classes
+looks within characters of our strings.
+
+```{r}
+str_count(val2, "[aeiou]") #counts the values
+
+# count any digit
+str_count(val2, "[0-9]")
+```
+
+# Examples
+```{r}
+strings<-c("550-153-7578",
+         "banana",
+         "435.114.7586",
+         "home: 672-442-6739")
+
+phone <- "([2-9][0-9]{2})[- .]([0-9]{3})[- .]([0-9]{4})"
+
+# Which strings contain phone numbers?
+str_detect(strings, phone)
+
+test<-str_subset(strings, phone)
+test
+
+```
+
+### Think, pair, share moment
+replace "." with "-".
+
+```{r}
+test %>%
+  str_replace_all("\\.", "-") %>% 
+  str_replace_all("[a-z]","") %>% 
+  str_replace_all("\\:","") %>% 
+  str_trim()
+```
+# tidytext
+
+```{r}
+# explore it
+head(austen_books())
+```
+
+
+### Let's clean it up and add a column for line and chapter
+```{r}
+original_books <- austen_books() %>% # get all of Jane Austen's books
+  group_by(book) %>%
+  mutate(line = row_number(), # find every line
+         chapter = cumsum(str_detect(text, regex("^chapter [\\divxlc]", # count the chapters (starts with the word chapter followed by a digit or roman numeral)
+                                                 ignore_case = TRUE)))) %>% #ignore lower or uppercase
+  ungroup() # ungroup it so we have a dataframe again
+# don't try to view the entire thing... its >73000 lines...
+head(original_books)
+```
+### Now lets do something about this massive text.
+
+```{r}
+tidy_books <- original_books %>%
+  unnest_tokens(output = word, input = text) # add a column named word, with the input as the text column
+head(tidy_books) # there are now >725,000 rows. Don't view the entire thing!
+```
+
+### lets remove our most commonly used words
+
+```{r}
+#see an example of all the stopwords
+head(get_stopwords())
+
+#but lets get rid of them
+cleaned_books <- tidy_books %>%
+  anti_join(get_stopwords()) # dataframe without the stopwords
+head(cleaned_books)
+```
+### lets TIDY this data up
+```{r}
+cleaned_books <- tidy_books %>%
+  anti_join(get_stopwords()) # dataframe without the stopwords
+
+cleaned_books %>%
+  count(word, sort = TRUE)
+```
+## Sentiment analysis
+```{r}
+sent_word_counts <- tidy_books %>%
+  inner_join(get_sentiments()) %>% # only keep pos or negative words
+  count(word, sentiment, sort = TRUE) # count them
+
+sent_word_counts
+```
+
+### lets plot this now 
+```{r}
+sent_word_counts %>%
+  filter(n > 150) %>% # take only if there are over 150 instances of it
+  mutate(n = ifelse(sentiment == "negative", -n, n)) %>% # add a column where if the word is negative make the count negative
+  mutate(word = reorder(word, n)) %>% # sort it so it gows from largest to smallest
+  ggplot(aes(word, n, fill = sentiment)) +
+  geom_col() +
+  coord_flip() +
+  labs(y = "Contribution to sentiment")
+```
+### but a word cloud is better...
+
+```{r}
+words<-cleaned_books %>%
+  count(word) %>% # count all the words
+  arrange(desc(n))%>% # sort the words
+  slice(1:100) #take the top 100
+wordcloud2(words, shape = 'triangle', size=0.3) # make a wordcloud out of the top 100 words
+```
+

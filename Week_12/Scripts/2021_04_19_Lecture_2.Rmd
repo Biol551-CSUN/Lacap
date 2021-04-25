@@ -1,0 +1,132 @@
+---
+title: "Week_12_Lecture_2"
+author: "Roland Lacap"
+date: "4/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+```
+
+# Working with factors using {forcats}
+
+### Loading data
+```{r, message=FALSE}
+library(tidyverse)
+library(here)
+
+income_mean <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_mean.csv')
+
+```
+
+# What is a factor?
+We storing categorical data that can be separated into values called levels.
+- default is alphabetical
+
+```{r}
+fruits<-factor(c("Apple", "Grape", "Banana")) #making a factor
+fruits
+```
+
+- When trying to make factors, everything will be ran as characters. If there are a mix, you will have NAs when you want to convert column into numbers.
+- read.csv -> will be factors
+- read_csv -> will be characters
+
+# Working with starwars
+```{r}
+starwars %>% 
+  filter(!is.na(species)) %>% # remove the NAs
+  count(species, sort = TRUE)
+```
+We are going lump them together using fct_lump()
+```{r}
+star_counts <- starwars %>% 
+  filter(!is.na(species)) %>% # remove the NAs
+  mutate(species = fct_lump(species, n = 3)) %>% 
+  count(species, sort = TRUE)
+
+star_counts
+```
+### Lets quickly plot it
+We can use fct_reorder() to maintain order and categorize it by value. Default is alphabetical so this is super helpful when wanting to show descending order.
+```{r}
+star_counts %>%
+  ggplot(aes(x = fct_reorder(species, n, .desc = TRUE), y = n))+ # reorder the factor of species by n
+  geom_col() +
+  labs(x = "Species")
+```
+
+# Lets work with income_mean data
+
+```{r}
+total_income<-income_mean %>%
+  group_by(year, income_quintile)%>%
+  summarise(income_dollars_sum = sum(income_dollars))%>%
+  mutate(income_quintile = factor(income_quintile)) # make it a factor
+
+total_income%>%
+ggplot(aes(x = year, y = income_dollars_sum, color = income_quintile))+
+  geom_line()
+```
+
+### The legend is not making sense, so lets change that.
+we will use fct_reorder2() to redorder data by two variables.
+```{r}
+total_income%>%
+  ggplot(aes(x = year, y = income_dollars_sum, 
+             color = fct_reorder2(income_quintile,year,income_dollars_sum)))+
+  geom_line()+
+  labs(color = "income quantile")
+```
+
+# You have more control in creating a vector
+Since the default is alphabetical order, we must combine factor() and levels to maintain desired order.
+
+```{r}
+x1 <- factor(c("Jan", "Mar", "Apr", "Dec"), #this will be alphabetical order
+             levels = c("Jan", "Mar", "Apr", "Dec")) #we use this to avoid that
+x1
+```
+
+# Subset data with factors
+
+```{r}
+starwars_clean<-starwars %>% 
+  filter(!is.na(species)) %>% # remove the NAs
+  count(species, sort = TRUE) %>%
+  mutate(species = factor(species)) %>% # make species a factor
+  filter(n>3) # only keep species that have more than 3
+starwars_clean
+```
+### lets look a the levels
+```{r}
+levels(starwars_clean$species)
+```
+The levels are still there--this will be a problem when plotting because it will be plotted as NAs. so we use droplevels() to remove levels that aren't present in the dataframe. 
+
+```{r}
+starwars_clean<-starwars %>% 
+  filter(!is.na(species)) %>% # remove the NAs
+  count(species, sort = TRUE) %>%
+  mutate(species = factor(species)) %>% # make species a factor 
+  filter(n>3)  %>% # only keep species that have more than 3 
+  droplevels() # drop extra levels
+
+levels(starwars_clean$species)
+```
+Notice that the only levels present are the ones we kept while data wrangling.
+
+# recode levels
+We will use fct_recode() to rename Human to Humanoid. 
+```{r}
+starwars_clean<-starwars %>% 
+  filter(!is.na(species)) %>% # remove the NAs
+  count(species, sort = TRUE) %>%
+  mutate(species = factor(species)) %>% # make species a factor 
+  filter(n>3)  %>% # only keep species that have more than 3 
+  droplevels() %>% # drop extra levels 
+  mutate(species = fct_recode(species, "Humanoid" = "Human"))
+starwars_clean
+```
+
