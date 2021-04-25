@@ -10,58 +10,55 @@ library(forcats)
 library(magick)
 library(PNWColors)
 
-
 ### Load Data
 intertidaldata <- read_csv(here("Week_12","Data","intertidaldata.csv"))
 intertidaldata_lat <- read_csv(here("Week_12","Data","intertidaldata_latitude.csv"))
 
 ### Wrangle data
 tidaldatafactor <- intertidaldata %>% 
-  filter(complete.cases(.)) %>% 
-  mutate(Quadrat = recode(Quadrat, 'Low  .' = "Low",
+  filter(complete.cases(.)) %>%  #filter out rows with any NAs
+  mutate(Quadrat = recode(Quadrat, 'Low  .' = "Low", #fix column names
                           'Mid  1' = "Mid")) %>%
-  select(1:10) %>% 
-  mutate(Quadrat = fct_lump(Quadrat)) %>% 
-  pivot_longer(cols = 4:10,
-               names_to = "type",
+  select(1:10) %>% #select columns 1 through 10
+  mutate(Quadrat = fct_lump(Quadrat)) %>% #lump all quadrats from transects together
+  pivot_longer(cols = 4:10, #choose columns to pivot longer
+               names_to = "type", #set pivot longer column names
                values_to = "cover") %>% 
-  group_by(Site, Quadrat, type) %>% 
-  summarise(average_cover = mean(cover, na.rm=TRUE)) %>% 
-  inner_join(intertidaldata_lat) %>% 
+  group_by(Site, Quadrat, type) %>% #group by site, quadrat, and type 
+  summarise(average_cover = mean(cover, na.rm=TRUE)) %>% #calculate mean percent cover and remove NAs
+  inner_join(intertidaldata_lat) %>% #inner join the latitude dataset
   mutate(Quadrat = factor(Quadrat,
                           levels = c("Low",
                                      "Mid",
-                                     "High")))
+                                     "High"))) #set the quadrat levels
 
 tidal_plot <- tidaldatafactor %>% 
-  ggplot(aes(x = Latitude, y = average_cover, 
-             fill = fct_reorder2(type,Latitude,average_cover)))+
-  geom_area(size = 1,
-            color = "black")+
-  facet_wrap(~Quadrat)+
-  labs(fill = "Type",
-       y = "Average Percent Cover")+
-  theme_spongeBob()+
+  ggplot(aes(x = Latitude, y = average_cover, #create ggplot with latitude and average cover on x and y axes
+             fill = fct_reorder2(type,Latitude,average_cover)))+ #factor reorder the type of organism
+  stat_smooth(
+    geom = 'area', method = 'loess', #smooth area plot
+    alpha = .75) +#set transparency
+  facet_wrap(~Quadrat)+ #facet wrap by tidal level (low, mid, or high)
+  labs(fill = "Type", #set labels
+       y = "Average Percent Cover",
+       title = "Coral reef inhabitants in Californian coasts",
+       caption = "Source: Dr. Nyssa Silbiger")+
+  ylim(0, 100) + #set y limits
+  theme_spongeBob()+ #set theme and theme aesthetics
   theme(strip.text.x = element_text(size = 12,
                                     face = 2,
                                     color = "white"))+
-  scale_fill_spongeBob()
+  scale_fill_spongeBob() +
+  ggsave(here("Week_12", "Output", "2021_04_21_2021_lab_assignment.png"))
 
 tidal_plot
 
-tidal_plot2 <- tidaldatafactor %>% 
-  ggplot(aes(x = Quadrat, y = average_cover, 
-             fill = fct_reorder2(type,Site,average_cover)))+
-  geom_bar(position = "stack",
-            stat = "identity")+
-  facet_wrap(~Site)+
-  labs(fill = "Type",
-       y = "Average Percent Cover")+
-  theme_spongeBob()+
-  theme(strip.text.x = element_text(size = 12,
-                                    face = 2,
-                                    color = "white"))+
-  scale_fill_spongeBob()
+#add spongebob to our plot
+spongebob <- image_read("https://cdn.shopify.com/s/files/1/0054/4371/5170/products/Spongebob_464pin.png?v=1602027340")
+tidalplot <- image_read(here("Week_12", "Output", "2021_04_21_2021_lab_assignment.png"))
 
-tidal_plot2
-
+spongeplot <-  image_composite(tidalplot, image_scale(spongebob, "x500"), 
+                               offset = "+70+30",
+                               gravity = "southwest") %>% 
+  image_write(here("Week_12","Output","20210425_lab_assignment.png"))
+spongeplot
